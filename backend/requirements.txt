@@ -1,0 +1,17 @@
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+
+# Async MySQL
+aiomysql==0.2.0
+
+# JWT Authentication
+PyJWT==2.10.1
+
+# Password Hashing
+bcrypt==4.3.0
+
+# Environment Variables
+python-dotenv==1.1.1
+
+# Form/File Upload Support
+python-multipart==0.0.20
