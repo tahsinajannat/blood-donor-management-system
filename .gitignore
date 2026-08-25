@@ -1,0 +1,129 @@
+# =====================================================
+# Flutter
+# =====================================================
+
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Flutter generated files
+**/generated_plugin_registrant.dart
+
+# Android
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+
+# macOS
+**/macos/Pods/
+**/macos/Flutter/ephemeral/
+
+# Windows
+**/windows/flutter/ephemeral/
+
+# Linux
+**/linux/flutter/ephemeral/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+
+# =====================================================
+# Python
+# =====================================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
+
+# =====================================================
+# FastAPI
+# =====================================================
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+
+# =====================================================
+# Python Packages / Build
+# =====================================================
+
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+wheels/
+
+
+# =====================================================
+# Database
+# =====================================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# =====================================================
+# Jupyter
+# =====================================================
+
+.ipynb_checkpoints/
+
+
+# =====================================================
+# OS
+# =====================================================
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+
+# =====================================================
+# Temporary Files
+# =====================================================
+
+*.tmp
+*.temp
+*.swp
+*.swo
