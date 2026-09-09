@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+from src.router.user_routes import router as user_router
+
 
 from fastapi import FastAPI
 
@@ -30,6 +32,7 @@ async def root():
         "message": "FastAPI server is running!"
     }
 
+app.include_router(user_router)
 
 @app.get("/health")
 async def health():
