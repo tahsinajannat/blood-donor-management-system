@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from src.router.user_routes import router as user_router
 from src.router.conversation_routes import router as conversation_router
 from src.router.message_routes import router as message_router
+from src.router.blood_request_routes import router as blood_request 
 
 from fastapi import FastAPI
 
@@ -36,6 +37,7 @@ async def root():
 app.include_router(user_router)
 app.include_router(conversation_router)
 app.include_router(message_router)
+app.include_router(blood_request) 
 @app.get("/health")
 async def health():
     return {
