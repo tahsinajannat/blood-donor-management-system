@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from src.router.user_routes import router as user_router
 from src.router.conversation_routes import router as conversation_router
@@ -27,12 +28,33 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "http://localhost:12750"
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:12750"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 async def root():
     return {
         "message": "FastAPI server is running!"
     }
+
 
 app.include_router(user_router)
 app.include_router(conversation_router)
@@ -44,4 +66,5 @@ async def health():
         "status": "ok",
         "database": "connected"
     }
+
 
