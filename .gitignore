@@ -127,3 +127,11 @@ Desktop.ini
 *.temp
 *.swp
 *.swo
+
+# =====================================================
+# Android signing (never commit)
+# =====================================================
+
+**/android/key.properties
+*.jks
+*.keystore

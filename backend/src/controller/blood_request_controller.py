@@ -83,6 +83,7 @@ async def create_blood_request(
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s
         )
+        RETURNING id
         """,
         (
             current_user_id,
@@ -98,7 +99,7 @@ async def create_blood_request(
         )
     )
 
-    request_id = cursor.lastrowid
+    request_id = (await cursor.fetchone())["id"]
 
     # Get created request with user information
     await cursor.execute(

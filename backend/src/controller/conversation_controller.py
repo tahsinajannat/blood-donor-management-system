@@ -78,11 +78,12 @@ async def create_conversation(current_user_id: int, other_user_id: int, db):
         INSERT INTO conversations
         (user1_id, user2_id)
         VALUES (%s, %s)
+        RETURNING id
         """,
         (user1_id, user2_id)
     )
 
-    conversation_id = cursor.lastrowid
+    conversation_id = (await cursor.fetchone())["id"]
 
     # Get conversation with user names
     await cursor.execute(

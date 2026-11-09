@@ -16,155 +16,150 @@ from src.utils.auth import (
 
 async def register_user(user: UserRegister):
 
-    async with db.pool.acquire() as connection:
+    async with db.db_session() as (connection, cursor):
 
-        async with connection.cursor() as cursor:
+        # Check email
+        await cursor.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE email = %s
+            """,
+            (user.email,)
+        )
 
-            # Check email
-            await cursor.execute(
-                """
-                SELECT id
-                FROM users
-                WHERE email = %s
-                """,
-                (user.email,)
+        existing_email = await cursor.fetchone()
+
+        if existing_email:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered"
             )
 
-            existing_email = await cursor.fetchone()
+        # Check phone
+        await cursor.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE phone = %s
+            """,
+            (user.phone,)
+        )
 
-            if existing_email:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Email already registered"
-                )
+        existing_phone = await cursor.fetchone()
 
-            # Check phone
-            await cursor.execute(
-                """
-                SELECT id
-                FROM users
-                WHERE phone = %s
-                """,
-                (user.phone,)
+        if existing_phone:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Phone number already registered"
             )
 
-            existing_phone = await cursor.fetchone()
+        # Hash password
+        password_hash = hash_password(user.password)
 
-            if existing_phone:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Phone number already registered"
-                )
-
-            # Hash password
-            password_hash = hash_password(user.password)
-
-            # Insert user
-            await cursor.execute(
-                """
-                INSERT INTO users (
-                    first_name,
-                    last_name,
-                    area,
-                    road,
-                    city,
-                    phone,
-                    email,
-                    blood_group,
-                    date_of_birth,
-                    password_hash
-                )
-                VALUES (
-                    %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s
-                )
-                """,
-                (
-                    user.first_name,
-                    user.last_name,
-                    user.area,
-                    user.road,
-                    user.city,
-                    user.phone,
-                    user.email,
-                    user.blood_group,
-                    user.date_of_birth,
-                    password_hash,
-                )
+        # Insert user
+        await cursor.execute(
+            """
+            INSERT INTO users (
+                first_name,
+                last_name,
+                area,
+                road,
+                city,
+                phone,
+                email,
+                blood_group,
+                date_of_birth,
+                password_hash
             )
+            VALUES (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )
+            RETURNING id
+            """,
+            (
+                user.first_name,
+                user.last_name,
+                user.area,
+                user.road,
+                user.city,
+                user.phone,
+                user.email,
+                user.blood_group,
+                user.date_of_birth,
+                password_hash,
+            )
+        )
 
-            await connection.commit()
+        await connection.commit()
 
-            user_id = cursor.lastrowid
+        user_id = (await cursor.fetchone())["id"]
 
-            return {
-                "message": "User registered successfully",
-                "user_id": user_id
-            }
+        return {
+            "message": "User registered successfully",
+            "user_id": user_id
+        }
 
 
 async def login_user(user: UserLogin):
 
-    async with db.pool.acquire() as connection:
+    async with db.db_session() as (connection, cursor):
 
-        async with connection.cursor() as cursor:
-
-            await cursor.execute(
-                """
-                SELECT
-                    id,
-                    email,
-                    password_hash,
-                    is_verified,
-                    is_active_donor
-                FROM users
-                WHERE email = %s
-                """,
-                (user.email,)
-            )
-
-            db_user = await cursor.fetchone()
-
-            if not db_user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid email or password"
-                )
-
-            (
-                user_id,
+        await cursor.execute(
+            """
+            SELECT
+                id,
                 email,
                 password_hash,
                 is_verified,
-                is_active_donor,
-            ) = db_user
+                is_active_donor
+            FROM users
+            WHERE email = %s
+            """,
+            (user.email,)
+        )
 
-            # Verify password
-            if not verify_password(
-                user.password,
-                password_hash
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid email or password"
-                )
+        db_user = await cursor.fetchone()
 
-            # Create JWT
-            access_token = create_access_token(
-                user_id
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
             )
 
-            return {
-                "message": "Login successful",
-                "access_token": access_token,
-                "token_type": "bearer",
-                "user": {
-                    "id": user_id,
-                    "email": email,
-                    "is_verified": is_verified,
-                    "is_active_donor": is_active_donor,
-                }
+        user_id = db_user["id"]
+        email = db_user["email"]
+        password_hash = db_user["password_hash"]
+        is_verified = db_user["is_verified"]
+        is_active_donor = db_user["is_active_donor"]
+
+        # Verify password
+        if not verify_password(
+            user.password,
+            password_hash
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+
+        # Create JWT
+        access_token = create_access_token(
+            user_id
+        )
+
+        return {
+            "message": "Login successful",
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": user_id,
+                "email": email,
+                "is_verified": is_verified,
+                "is_active_donor": is_active_donor,
             }
+        }
 
 
 async def get_user_profile(user_id: int, db):
@@ -368,20 +363,14 @@ async def search_donors(
         """
         (
             last_donation_date IS NULL
-            OR last_donation_date <= DATE_SUB(
-                CURDATE(),
-                INTERVAL 4 MONTH
-            )
+            OR last_donation_date <= CURRENT_DATE - INTERVAL '4 months'
         )
         """,
 
         # Age greater than 15
         """
         date_of_birth IS NOT NULL
-        AND date_of_birth < DATE_SUB(
-            CURDATE(),
-            INTERVAL 15 YEAR
-        )
+        AND date_of_birth < CURRENT_DATE - INTERVAL '15 years'
         """
     ]
 
@@ -408,7 +397,7 @@ async def search_donors(
     if area:
 
         conditions.append(
-            "area LIKE %s"
+            "area ILIKE %s"
         )
 
         params.append(f"%{area}%")
@@ -421,7 +410,7 @@ async def search_donors(
     if city:
 
         conditions.append(
-            "city LIKE %s"
+            "city ILIKE %s"
         )
 
         params.append(f"%{city}%")
@@ -475,7 +464,7 @@ async def search_donors(
         WHERE {where_clause}
 
         ORDER BY
-            last_donation_date ASC
+            last_donation_date ASC NULLS FIRST
 
         LIMIT %s OFFSET %s
     """

@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="My FastAPI Backend",
-    description="FastAPI + Async MySQL API",
+    description="FastAPI + Async PostgreSQL API",
     version="1.0.0",
     lifespan=lifespan,
 )

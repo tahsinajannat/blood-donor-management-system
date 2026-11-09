@@ -51,7 +51,7 @@ static const String baseUrl = "http://10.0.2.2:8000"; // Android emulator defaul
 - Deployed backend: its public HTTPS URL
 
 Make sure the FastAPI backend (`backend/main.py`) is actually running and reachable at that
-address, and that its `.env` (copy from `.env.example`) has valid MySQL + JWT settings.
+address, and that its `.env` (copy from `.env.example`) has valid PostgreSQL + JWT settings.
 
 ## 2. Generate native platform folders
 

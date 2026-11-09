@@ -47,6 +47,7 @@ async def send_message(
         INSERT INTO messages
         (conversation_id, sender_id, message)
         VALUES (%s, %s, %s)
+        RETURNING id
         """,
         (
             conversation_id,
@@ -55,7 +56,7 @@ async def send_message(
         )
     )
 
-    message_id = cursor.lastrowid
+    message_id = (await cursor.fetchone())["id"]
 
     # Update last message in conversation
     await cursor.execute(
